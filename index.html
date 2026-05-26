@@ -525,30 +525,30 @@ tbody tr:hover{background:var(--bg)}
         <select class="fsel" id="pc" onchange="renderProds()"><option value="">All Categories</option></select>
         <select class="fsel" id="psort" onchange="renderProds()"><option value="name">A–Z</option><option value="price">Price</option><option value="qty">Quantity</option></select>
       </div>
-      <!-- Inventory Valuation Summary -->
-      <div id="inv-val-panel" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <!-- Inventory Valuation Summary — Super Admin only -->
+      <div id="inv-val-panel" style="display:none;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
         <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:13px">
           <div style="width:44px;height:44px;background:#D1FAE5;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🏷️</div>
-          <div>
+          <div style="flex:1;min-width:0">
             <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#059669;margin-bottom:3px">Total Cost Price</div>
             <div id="sv-cost" style="font-size:1.25rem;font-weight:800;color:#059669;font-family:'JetBrains Mono',monospace">&#8358;0</div>
-            <div style="font-size:.71rem;color:#6B7280;margin-top:2px">Value of stock at cost</div>
+            <div id="sv-cost-sub" style="font-size:.7rem;color:#6B7280;margin-top:3px">Value of stock at cost</div>
           </div>
         </div>
         <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:13px">
           <div style="width:44px;height:44px;background:#DBEAFE;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">&#128176;</div>
-          <div>
+          <div style="flex:1;min-width:0">
             <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#2563EB;margin-bottom:3px">Total Selling Price</div>
             <div id="sv-sell" style="font-size:1.25rem;font-weight:800;color:#2563EB;font-family:'JetBrains Mono',monospace">&#8358;0</div>
-            <div style="font-size:.71rem;color:#6B7280;margin-top:2px">Value of stock at retail</div>
+            <div id="sv-sell-sub" style="font-size:.7rem;color:#6B7280;margin-top:3px">Value of stock at retail</div>
           </div>
         </div>
         <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:13px">
           <div style="width:44px;height:44px;background:#FFEDD5;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">&#128200;</div>
-          <div>
+          <div style="flex:1;min-width:0">
             <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#D97706;margin-bottom:3px">Potential Profit</div>
             <div id="sv-profit" style="font-size:1.25rem;font-weight:800;color:#D97706;font-family:'JetBrains Mono',monospace">&#8358;0</div>
-            <div style="font-size:.71rem;color:#6B7280;margin-top:2px">If all stock is sold</div>
+            <div id="sv-profit-sub" style="font-size:.7rem;color:#6B7280;margin-top:3px">If all stock is sold</div>
           </div>
         </div>
       </div>
@@ -1682,11 +1682,22 @@ function renderProds(){
   let list=PRODS.filter(p=>(!q||p.name.toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q))&&(!cat||p.category===cat));
   list.sort((a,b)=>srt==='price'?a.price-b.price:srt==='qty'?a.quantity-b.quantity:a.name.localeCompare(b.name));
   g('prod-sub').textContent=list.length+' of '+PRODS.length+' products';
-  // Stock valuation
-  const totalCost=PRODS.reduce((a,p)=>a+((p.costPrice||0)*(p.quantity||0)),0);
-  const totalSell=PRODS.reduce((a,p)=>a+((p.price||0)*(p.quantity||0)),0);
-  if(g('sv-cost')) g('sv-cost').textContent=fmt(Math.round(totalCost*100)/100);
-  if(g('sv-sell')) g('sv-sell').textContent=fmt(Math.round(totalSell*100)/100);
+  // Stock valuation — Super Admin only
+  const valPanel=g('inv-val-panel');
+  if(valPanel) valPanel.style.display=(SA_MODE)?'grid':'none';
+  if(SA_MODE){
+    const valuedProds=PRODS.filter(p=>p.price>0&&p.quantity>0);
+    const costProds=PRODS.filter(p=>(p.costPrice||0)>0&&p.quantity>0);
+    const totalCost=costProds.reduce((a,p)=>a+((p.costPrice||0)*(p.quantity||0)),0);
+    const totalSell=valuedProds.reduce((a,p)=>a+((p.price||0)*(p.quantity||0)),0);
+    const totalProfit=totalSell-totalCost;
+    if(g('sv-cost')) g('sv-cost').textContent=fmt(Math.round(totalCost*100)/100);
+    if(g('sv-sell')) g('sv-sell').textContent=fmt(Math.round(totalSell*100)/100);
+    if(g('sv-profit')){g('sv-profit').textContent=fmt(Math.round(totalProfit*100)/100);g('sv-profit').style.color=totalProfit>=0?'#D97706':'#EF4444';}
+    if(g('sv-cost-sub')) g('sv-cost-sub').textContent=costProds.length+' of '+PRODS.length+' products have cost price';
+    if(g('sv-sell-sub')) g('sv-sell-sub').textContent=valuedProds.length+' products with stock';
+    if(g('sv-profit-sub')) g('sv-profit-sub').textContent=costProds.length<PRODS.length?'⚠️ '+(PRODS.length-costProds.length)+' products missing cost price':'Based on all products';
+  }
   // Cat filter
   const cats=[...new Set(PRODS.map(p=>p.category).filter(Boolean))].sort();
   const cf=g('pc'); if(cf){const cv=cf.value;cf.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${esc(c)}"${c===cv?' selected':''}>${esc(c)}</option>`).join('');}
@@ -3357,12 +3368,27 @@ renderProds=function(){
   let list=PRODS.filter(p=>(!q||p.name.toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q))&&(!cat||p.category===cat));
   list.sort((a,b)=>srt==='price'?a.price-b.price:srt==='qty'?a.quantity-b.quantity:a.name.localeCompare(b.name));
   g('prod-sub').textContent=list.length+' of '+PRODS.length+' products';
-  // Stock valuation
-  const totalCost=PRODS.reduce((a,p)=>a+((p.costPrice||0)*(p.quantity||0)),0);
-  const totalSell=PRODS.reduce((a,p)=>a+((p.price||0)*(p.quantity||0)),0);
-  if(g('sv-cost')) g('sv-cost').textContent=fmt(Math.round(totalCost*100)/100);
-  if(g('sv-sell')) g('sv-sell').textContent=fmt(Math.round(totalSell*100)/100);
-  if(g('sv-profit')) g('sv-profit').textContent=fmt(Math.round((totalSell-totalCost)*100)/100);
+  // Stock valuation — visible to Super Admin only
+  const valPanel=g('inv-val-panel');
+  if(valPanel) valPanel.style.display=(SA_MODE)?'grid':'none';
+  if(SA_MODE){
+    // Only count products that have BOTH price and costPrice set (non-zero)
+    const valuedProds=PRODS.filter(p=>p.price>0&&p.quantity>0);
+    const costProds=PRODS.filter(p=>(p.costPrice||0)>0&&p.quantity>0);
+    const totalCost=costProds.reduce((a,p)=>a+((p.costPrice||0)*(p.quantity||0)),0);
+    const totalSell=valuedProds.reduce((a,p)=>a+((p.price||0)*(p.quantity||0)),0);
+    const totalProfit=totalSell-totalCost;
+    if(g('sv-cost')) g('sv-cost').textContent=fmt(Math.round(totalCost*100)/100);
+    if(g('sv-sell')) g('sv-sell').textContent=fmt(Math.round(totalSell*100)/100);
+    if(g('sv-profit')){
+      g('sv-profit').textContent=fmt(Math.round(totalProfit*100)/100);
+      g('sv-profit').style.color=totalProfit>=0?'#D97706':'#EF4444';
+    }
+    // Sub-labels showing product count used
+    if(g('sv-cost-sub')) g('sv-cost-sub').textContent=costProds.length+' of '+PRODS.length+' products have cost price';
+    if(g('sv-sell-sub')) g('sv-sell-sub').textContent=valuedProds.length+' products with stock';
+    if(g('sv-profit-sub')) g('sv-profit-sub').textContent=costProds.length<PRODS.length?'⚠️ '+( PRODS.length-costProds.length)+' products missing cost price':'Based on all products';
+  }
   const cats=[...new Set(PRODS.map(p=>p.category).filter(Boolean))].sort();
   const cf=g('pc'); if(cf){const cv=cf.value;cf.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${esc(c)}"${c===cv?' selected':''}>${esc(c)}</option>`).join('');}
   const dl=g('cat-dl'); if(dl) dl.innerHTML=cats.map(c=>`<option value="${esc(c)}">`).join('');
