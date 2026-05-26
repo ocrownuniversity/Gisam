@@ -2668,7 +2668,7 @@ function onSP(){
   g('sm-qty').max=stock;
   g('sm-qty').step=unitsPerPack>1?'0.25':'1';
   g('sm-info').textContent=stock+' in stock · Default price: '+fmt(price)+(unitsPerPack>1?' · '+unitsPerPack+' units/pack':'');
-  if(g('sm-custom-price')){ g('sm-custom-price').value=''; g('sm-custom-price').placeholder=price.toFixed(2); }
+  if(g('sm-custom-price')){ g('sm-custom-price').placeholder=defaultPrice.toFixed(2); }
   g('sm-info').classList.remove('h');
   buildHalfBtns(unitsPerPack);
 }
@@ -2681,7 +2681,9 @@ function addToCart(){
   const qty=parseFloat(g('sm-qty').value);
   if(!qty||qty<=0){ toast('Enter a valid quantity','w'); return; }
 
-  const price=parseFloat(sel.dataset.p||0);
+  const defaultPrice=parseFloat(sel.dataset.p||0);
+  const customPriceInput=parseFloat(g('sm-custom-price')?.value||0);
+  const price=customPriceInput>0?customPriceInput:defaultPrice;
   const stock=parseInt(sel.dataset.q||0);
   const name=(g('sm-prod-search')?.value||'').split(' (')[0].trim()||pid;
   const prod=PRODS.find(p=>p.id===pid);
