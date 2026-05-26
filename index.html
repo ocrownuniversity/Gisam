@@ -1557,10 +1557,11 @@ function nav(pg){
   const titles={dashboard:'Dashboard',products:'Products',sales:'Sales',reports:'Reports',alerts:'Alerts',staff:'Staff',buyers:'Branches',returns:'Returns',settings:'Settings',customers:'Customers'};
   g('tb-title').textContent=titles[pg]||pg;
   // Render from cache immediately (instant), then refresh data in background
-  const renderMap={dashboard:renderDash,products:renderProds,sales:renderSales,reports:renderRpt,alerts:renderNotifs,staff:renderStaff,buyers:renderBuyers,returns:renderReturns,customers:renderCustomers};
+  const renderMap={dashboard:renderDash,products:renderProds,sales:renderSales,reports:renderRpt,alerts:renderNotifs,staff:renderStaff,buyers:renderBuyers,returns:renderReturns,customers:renderCustomers,credits:()=>{renderCreditPayments();renderCreditSummary();}};
   if(renderMap[pg]) renderMap[pg](); // instant render from cache
   // Only load customers fresh when navigating (small collection)
   if(pg==='customers') subscribeCustomers();
+  if(pg==='credits') loadCreditPayments();
   closeSB();
 }
 function loadPage(pg){ nav(pg); }
@@ -3865,12 +3866,27 @@ async function loadCreditPayments(){
 }
 
 function renderCreditSummary(){
-  // Total owed = all credit sales
-  const creditSales=SALES.filter(s=>(s.paymentType||'').toLowerCase()==='credit'&&s.status!=='voided'&&!s.voided);
+  // Credit sales = paymentType is credit OR any splitPayments entry is credit
+  const creditSales=SALES.filter(s=>{
+    if(s.status==='voided'||s.voided) return false;
+    const pt=(s.paymentType||'').toLowerCase();
+    if(pt==='credit') return true;
+    // Also catch split payments that include credit
+    if(s.splitPayments&&s.splitPayments.some(sp=>(sp.type||'').toLowerCase()==='credit')) return true;
+    return false;
+  });
+  // Deduplicate by receiptId — use a single Set across all sales
   const seenC=new Set(); let totalOwed=0;
   for(const s of creditSales){
     if(s.receiptId){ if(seenC.has(s.receiptId)) continue; seenC.add(s.receiptId); }
-    totalOwed+=s.grandTotal||s.total||0;
+    // For split payments, only count the credit portion
+    let amount=0;
+    if(s.splitPayments&&s.splitPayments.length>0){
+      amount=s.splitPayments.filter(sp=>(sp.type||'').toLowerCase()==='credit').reduce((a,sp)=>a+(sp.amount||0),0);
+    } else {
+      amount=s.grandTotal||s.total||0;
+    }
+    totalOwed+=amount;
   }
   const totalPaid=CREDIT_PAYMENTS.reduce((a,p)=>a+(p.amount||0),0);
   const balance=Math.max(totalOwed-totalPaid,0);
@@ -3878,18 +3894,25 @@ function renderCreditSummary(){
   if(g('cr-total-paid')) g('cr-total-paid').textContent=fmt(Math.round(totalPaid*100)/100);
   if(g('cr-balance'))    g('cr-balance').textContent=fmt(Math.round(balance*100)/100);
 
-  // Build per-customer summary
+  // Build per-customer summary — use a single seen set per customer loop
   const custMap={};
+  const seenForCust=new Set();
   creditSales.forEach(s=>{
     const c=s.customer||'Unknown';
-    if(!custMap[c]) custMap[c]={owed:0,paid:0};
-    const seen2=new Set();
-    if(s.receiptId){ if(seen2.has(s.receiptId)) return; seen2.add(s.receiptId); }
-    custMap[c].owed+=s.grandTotal||s.total||0;
+    if(!custMap[c]) custMap[c]={owed:0,paid:0,sales:[]};
+    if(s.receiptId){ if(seenForCust.has(s.receiptId)) return; seenForCust.add(s.receiptId); }
+    let amount=0;
+    if(s.splitPayments&&s.splitPayments.length>0){
+      amount=s.splitPayments.filter(sp=>(sp.type||'').toLowerCase()==='credit').reduce((a,sp)=>a+(sp.amount||0),0);
+    } else {
+      amount=s.grandTotal||s.total||0;
+    }
+    custMap[c].owed+=amount;
+    custMap[c].sales.push(s.productName||'');
   });
   CREDIT_PAYMENTS.forEach(p=>{
     const c=p.customer||'Unknown';
-    if(!custMap[c]) custMap[c]={owed:0,paid:0};
+    if(!custMap[c]) custMap[c]={owed:0,paid:0,sales:[]};
     custMap[c].paid+=p.amount||0;
   });
   const el=g('cr-customer-list');
