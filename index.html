@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Fujup Venture</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0F1F45"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Fujup"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -458,6 +466,7 @@ tbody tr:hover{background:var(--bg)}
     <a class="sb-lk" data-pg="alerts" onclick="nav('alerts')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alerts<span class="sb-badge" id="sb-notif"></span></a>
     <a class="sb-lk" data-pg="returns" id="nav-returns" onclick="nav('returns')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Returns</a>
     <a class="sb-lk" data-pg="expenses" id="nav-expenses" onclick="nav('expenses')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Expenses</a>
+    <button id="pwa-install-btn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;margin:8px 16px;padding:10px 16px;background:linear-gradient(135deg,#2563EB,#0F1F45);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;width:calc(100% - 32px)">📲 Install App</button>
     <a class="sb-lk" data-pg="credits" id="nav-credits" onclick="nav('credits')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credit Payments</a>
     <div class="sb-sec" id="admin-section">Admin</div>
     <a class="sb-lk" data-pg="staff" id="nav-staff" onclick="nav('staff')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Staff</a>
@@ -4136,6 +4145,51 @@ function setProfitTab(tab, el){
 }
 
 console.log('%c Fujup Venture ✓','background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;padding:5px 12px;border-radius:5px;font-weight:700');
+</script>
+<script>
+// ── PWA SERVICE WORKER REGISTRATION ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async ()=>{
+    try{
+      const reg = await navigator.serviceWorker.register('sw.js');
+      console.log('[PWA] Service worker registered:', reg.scope);
+      // Check for updates every time app loads
+      reg.addEventListener('updatefound', ()=>{
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', ()=>{
+          if(newWorker.state==='installed' && navigator.serviceWorker.controller){
+            // New version available — show update toast
+            if(typeof toast === 'function') toast('🔄 Update available — reload to apply','i');
+          }
+        });
+      });
+    }catch(e){ console.warn('[PWA] SW registration failed:', e); }
+  });
+  // Listen for SW telling us we are offline/online
+  navigator.serviceWorker.addEventListener('message', e=>{
+    if(e.data?.type==='OFFLINE') if(typeof toast==='function') toast('📴 You are offline — changes saved locally','i');
+    if(e.data?.type==='ONLINE')  if(typeof toast==='function') toast('✅ Back online — syncing...','s');
+  });
+}
+// ── PWA INSTALL PROMPT ──
+let _deferredInstall=null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); _deferredInstall=e;
+  // Show install button if it exists
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display='flex';
+});
+window.addEventListener('appinstalled', ()=>{
+  _deferredInstall=null;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display='none';
+  if(typeof toast==='function') toast('✅ Fujup installed on your device!','s');
+});
+function installPWA(){
+  if(!_deferredInstall) return;
+  _deferredInstall.prompt();
+  _deferredInstall.userChoice.then(r=>{ if(r.outcome==='accepted') _deferredInstall=null; });
+}
 </script>
 </body>
 </html>
