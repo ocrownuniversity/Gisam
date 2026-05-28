@@ -3177,7 +3177,15 @@ function getFilteredSales(){
   }).sort((a,b)=>new Date(b.saleDate||b.timestamp)-new Date(a.saleDate||a.timestamp));
 }
 
-function buildSaleRows(list){
+function buildSaleRows(list, activePayFilter){
+  // Helper: map raw payment type to filter key
+  const mapType=t=>{const m=(t||'cash').toLowerCase();return m==='pos'||m==='atm'?'pos':m==='transfer'?'transfer':m==='credit'?'credit':'cash';};
+  // If a payment filter is active, compute only the matching split portion for display
+  const displayTotal=(splitPayments, grandTotal)=>{
+    if(!activePayFilter||!splitPayments||splitPayments.length<=1) return grandTotal;
+    const portion=splitPayments.filter(sp=>mapType(sp.type)===activePayFilter).reduce((a,sp)=>a+(sp.amount||0),0);
+    return portion>0?portion:grandTotal;
+  };
   const groups={}, singles=[], seen=new Set();
   list.forEach(s=>{
     if(s.receiptId){
@@ -3187,19 +3195,28 @@ function buildSaleRows(list){
         const first=siblings[0];
         const voided=first.status==='voided';
         const grandTotal=first.grandTotal||siblings.reduce((a,x)=>a+(x.total||0),0);
+        const splits=first.splitPayments||[];
         groups[s.receiptId]={
           key:first.receiptId, products:siblings.map(x=>x.productName).join(', '),
-          qty:siblings.reduce((a,x)=>a+x.quantity,0), total:grandTotal,
-          payment:(first.splitPayments&&first.splitPayments.length>1)?'Split: '+first.splitPayments.map(p=>(p.type||'cash')).join('+'):(first.paymentType||'cash'), splitPayments:first.splitPayments||[], customer:first.customer||'',
+          qty:siblings.reduce((a,x)=>a+x.quantity,0),
+          total:displayTotal(splits,grandTotal),
+          grandTotal,
+          payment:splits.length>1?'Split: '+splits.map(p=>(p.type||'cash')).join('+'):(first.paymentType||'cash'),
+          splitPayments:splits, customer:first.customer||'',
           cashier:first.cashier||'—', rawDate:new Date(first.saleDate||first.timestamp),
           date:fmtDT(first.saleDate||first.timestamp), voided, id:first.id,
           rcpId:first.receiptId, isGroup:true
         };
       }
     } else {
+      const splits=s.splitPayments||[];
+      const grandTotal=s.grandTotal||s.total;
       singles.push({
-        key:s.id, products:s.productName, qty:s.quantity, total:s.grandTotal||s.total,
-        payment:(s.splitPayments&&s.splitPayments.length>1)?'Split: '+s.splitPayments.map(p=>(p.type||'cash')).join('+'):(s.paymentType||'cash'), splitPayments:s.splitPayments||[], customer:s.customer||'',
+        key:s.id, products:s.productName, qty:s.quantity,
+        total:displayTotal(splits,grandTotal),
+        grandTotal,
+        payment:splits.length>1?'Split: '+splits.map(p=>(p.type||'cash')).join('+'):(s.paymentType||'cash'),
+        splitPayments:splits, customer:s.customer||'',
         cashier:s.cashier||'—', rawDate:new Date(s.saleDate||s.timestamp),
         date:fmtDT(s.saleDate||s.timestamp), voided:s.status==='voided',
         id:s.id, rcpId:s.receiptId||null, isGroup:false
@@ -3212,11 +3229,18 @@ function buildSaleRows(list){
 function renderSales(){
   const list=getFilteredSales();
   const nonVoided=list.filter(s=>s.status!=='voided'&&!s.voided);
-  // Deduplicate by receiptId so multi-item receipts are counted once
+  // Deduplicate by receiptId — when payment filter active, sum only the matching split portion
+  const mapTypeRev=t=>{const m=(t||'cash').toLowerCase();return m==='pos'||m==='atm'?'pos':m==='transfer'?'transfer':m==='credit'?'credit':'cash';};
   const seenRevIds=new Set(); let totalRev=0;
   for(const s of nonVoided){
     if(s.receiptId){ if(seenRevIds.has(s.receiptId)) continue; seenRevIds.add(s.receiptId); }
-    totalRev+=s.grandTotal||s.total||0;
+    const splits=s.splitPayments||[];
+    if(fPay&&splits.length>1){
+      // Only count the portion of this split that matches the active filter
+      totalRev+=splits.filter(sp=>mapTypeRev(sp.type)===fPay).reduce((a,sp)=>a+(sp.amount||0),0);
+    } else {
+      totalRev+=s.grandTotal||s.total||0;
+    }
   }
   totalRev=Math.round(totalRev*100)/100;
 
@@ -3231,7 +3255,7 @@ function renderSales(){
     if(g('sds-rev'))   g('sds-rev').textContent=fmt(totalRev);
   }
 
-  const rows=buildSaleRows(list);
+  const rows=buildSaleRows(list,fPay);
   g('sales-sub').textContent=rows.length+' transaction'+(rows.length!==1?'s':'')+' · '+fmt(totalRev);
 
   // Group by date
