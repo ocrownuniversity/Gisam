@@ -3225,6 +3225,7 @@ function buildSaleRows(list, activePayFilter){
 }
 
 function renderSales(){
+  const fPay=g('sf-pay')?.value||'';
   const list=getFilteredSales();
   const nonVoided=list.filter(s=>s.status!=='voided'&&!s.voided);
   // Deduplicate by receiptId — when payment filter active, sum only the matching split portion
@@ -3234,7 +3235,6 @@ function renderSales(){
     if(s.receiptId){ if(seenRevIds.has(s.receiptId)) continue; seenRevIds.add(s.receiptId); }
     const splits=s.splitPayments||[];
     if(fPay&&splits.length>1){
-      // Only count the portion of this split that matches the active filter
       totalRev+=splits.filter(sp=>mapTypeRev(sp.type)===fPay).reduce((a,sp)=>a+(sp.amount||0),0);
     } else {
       totalRev+=s.grandTotal||s.total||0;
