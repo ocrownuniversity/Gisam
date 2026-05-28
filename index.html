@@ -713,7 +713,7 @@ tbody tr:hover{background:var(--bg)}
       </div>
       <!-- Payment history -->
       <div class="card">
-        <div class="card-head"><h3>📋 Payment History</h3><input type="date" class="fsel" id="cr-date-filter" onchange="renderCreditPayments()" style="font-size:.8rem"/></div>
+        <div class="card-head"><h3>📋 Payment History</h3><span style="display:flex;align-items:center;gap:6px"><input type="date" class="fsel" id="cr-date-filter" onchange="renderCreditPayments()" style="font-size:.8rem"/><button onclick="g('cr-date-filter').value='';renderCreditPayments()" style="border:none;background:#F3F4F6;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem;color:#6B7280" title="Show all">✕ All</button></span></div>
         <div class="tw"><table><thead><tr><th>#</th><th>Customer</th><th>Amount Paid</th><th>Method</th><th>Note</th><th>Recorded By</th><th>Date</th></tr></thead><tbody id="cr-pay-tb"></tbody></table></div>
       </div>
     </div>
@@ -1557,11 +1557,11 @@ function nav(pg){
   const titles={dashboard:'Dashboard',products:'Products',sales:'Sales',reports:'Reports',alerts:'Alerts',staff:'Staff',buyers:'Branches',returns:'Returns',settings:'Settings',customers:'Customers'};
   g('tb-title').textContent=titles[pg]||pg;
   // Render from cache immediately (instant), then refresh data in background
-  const renderMap={dashboard:renderDash,products:renderProds,sales:renderSales,reports:renderRpt,alerts:renderNotifs,staff:renderStaff,buyers:renderBuyers,returns:renderReturns,customers:renderCustomers,credits:()=>{renderCreditPayments();renderCreditSummary();}};
+  const renderMap={dashboard:renderDash,products:renderProds,sales:renderSales,reports:renderRpt,alerts:renderNotifs,staff:renderStaff,buyers:renderBuyers,returns:renderReturns,customers:renderCustomers,credits:()=>{loadCreditPayments(true);renderCreditSummary();}};
   if(renderMap[pg]) renderMap[pg](); // instant render from cache
   // Only load customers fresh when navigating (small collection)
   if(pg==='customers') subscribeCustomers();
-  if(pg==='credits') loadCreditPayments();
+  if(pg==='credits'){ if(g('cr-date-filter')) g('cr-date-filter').value=''; loadCreditPayments(true); }
   closeSB();
 }
 function loadPage(pg){ nav(pg); }
@@ -3973,7 +3973,8 @@ async function loadCreditPayments(forceRefresh){
       if(c){
         const parsed=JSON.parse(c);
         const age=(Date.now()-(parsed.savedAt||0))/1000/60;
-        if(age<60&&parsed.data){
+        // Only trust cache if it's fresh AND has actual payment records
+        if(age<60&&Array.isArray(parsed.data)&&parsed.data.length>0){
           CREDIT_PAYMENTS=parsed.data;
           renderCreditPayments(); renderCreditSummary();
           return;
