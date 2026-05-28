@@ -1522,9 +1522,7 @@ async function loadBranchData(forceRefresh){
   }catch(e){console.warn('products:',e.message);}
 
   try{
-    // Only fetch sales from last 90 days — avoids reading entire history on every cache miss
-    const ninetyDaysAgo=new Date(); ninetyDaysAgo.setDate(ninetyDaysAgo.getDate()-90);
-    const s=await base.collection('sales').where('saleDate','>=',ninetyDaysAgo.toISOString().split('T')[0]).get();
+    const s=await base.collection('sales').get();
     SALES=s.docs.map(d=>{const dt=d.data();return{id:d.id,...dt,timestamp:dt.timestamp?.toDate?.()|| new Date(dt.timestamp||Date.now())};});
     SALES.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
   }catch(e){console.warn('sales:',e.message);}
