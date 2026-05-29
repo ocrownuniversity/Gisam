@@ -4191,7 +4191,10 @@ if('serviceWorker' in navigator){
 }
 // ── PWA INSTALL PROMPT ──
 let _deferredInstall=null;
+const _isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+
 function _showInstallBanners(){
+  if(_isStandalone) return; // already installed — never show
   ['pwa-install-banner','pwa-install-banner-sa','pwa-install-btn'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='flex';
@@ -4203,10 +4206,13 @@ function _hideInstallBanners(){
     if(el) el.style.display='none';
   });
 }
-// Don't show if already installed as standalone
-if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone){
-  _hideInstallBanners();
-} 
+
+// Show banner immediately unless already running as installed PWA
+if(!_isStandalone){
+  // Use DOMContentLoaded so elements exist
+  document.addEventListener('DOMContentLoaded', _showInstallBanners);
+}
+
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); _deferredInstall=e;
   _showInstallBanners();
@@ -4217,9 +4223,19 @@ window.addEventListener('appinstalled', ()=>{
   if(typeof toast==='function') toast('✅ Fujup installed on your device!','s');
 });
 function installPWA(){
-  if(!_deferredInstall) return;
-  _deferredInstall.prompt();
-  _deferredInstall.userChoice.then(r=>{ if(r.outcome==='accepted'){ _deferredInstall=null; _hideInstallBanners(); } });
+  if(_deferredInstall){
+    // Chrome — use native prompt
+    _deferredInstall.prompt();
+    _deferredInstall.userChoice.then(r=>{ if(r.outcome==='accepted'){ _deferredInstall=null; _hideInstallBanners(); }});
+  } else {
+    // Safari / already-installed Chrome — show manual instructions
+    const ua=navigator.userAgent.toLowerCase();
+    const isIOS=/iphone|ipad|ipod/.test(ua);
+    const msg=isIOS
+      ? 'To install: tap the Share button (□↑) at the bottom of Safari, then tap "Add to Home Screen"'
+      : 'To install: tap the ⋮ menu in Chrome, then tap "Add to Home Screen" or "Install app"';
+    alert(msg);
+  }
 }
 </script>
 </body>
