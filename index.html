@@ -400,6 +400,15 @@ tbody tr:hover{background:var(--bg)}
       <button class="nk" onclick="sPdel()">⌫</button>
     </div>
     <button class="btn-ghost" onclick="show('lock-screen')">👤 Staff / Branch Login</button>
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner-sa" style="display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1e3a8a,#2563EB);border-radius:12px;padding:12px 16px;margin-bottom:14px;cursor:pointer" onclick="installPWA()">
+      <div style="font-size:1.6rem;flex-shrink:0">📲</div>
+      <div style="flex:1;min-width:0">
+        <div style="color:#fff;font-weight:700;font-size:.85rem">Install Fujup App</div>
+        <div style="color:#93C5FD;font-size:.75rem;margin-top:1px">Add to home screen for offline use</div>
+      </div>
+      <div style="color:#fff;font-size:.8rem;background:rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-weight:600;white-space:nowrap">Install</div>
+    </div>
     <div class="lfoot"><span class="pdot"></span>Firebase Sync · Secured</div>
   </div>
 </div>
@@ -436,6 +445,15 @@ tbody tr:hover{background:var(--bg)}
         <button class="nk" onclick="pdel()">⌫</button>
       </div>
       <button class="btn-ghost" onclick="switchTab('login')">👤 Staff Login</button>
+    </div>
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" style="display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1e3a8a,#2563EB);border-radius:12px;padding:12px 16px;margin-bottom:14px;cursor:pointer" onclick="installPWA()">
+      <div style="font-size:1.6rem;flex-shrink:0">📲</div>
+      <div style="flex:1;min-width:0">
+        <div style="color:#fff;font-weight:700;font-size:.85rem">Install Fujup App</div>
+        <div style="color:#93C5FD;font-size:.75rem;margin-top:1px">Add to home screen for offline use</div>
+      </div>
+      <div style="color:#fff;font-size:.8rem;background:rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-weight:600;white-space:nowrap">Install</div>
     </div>
     <div class="lfoot"><span class="pdot"></span>Multi-device sync · <strong onclick="show('sa-screen')">Super Admin</strong></div>
   </div>
@@ -4173,22 +4191,35 @@ if('serviceWorker' in navigator){
 }
 // ── PWA INSTALL PROMPT ──
 let _deferredInstall=null;
+function _showInstallBanners(){
+  ['pwa-install-banner','pwa-install-banner-sa','pwa-install-btn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='flex';
+  });
+}
+function _hideInstallBanners(){
+  ['pwa-install-banner','pwa-install-banner-sa','pwa-install-btn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+}
+// Don't show if already installed as standalone
+if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone){
+  _hideInstallBanners();
+} 
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); _deferredInstall=e;
-  // Show install button if it exists
-  const btn=document.getElementById('pwa-install-btn');
-  if(btn) btn.style.display='flex';
+  _showInstallBanners();
 });
 window.addEventListener('appinstalled', ()=>{
   _deferredInstall=null;
-  const btn=document.getElementById('pwa-install-btn');
-  if(btn) btn.style.display='none';
+  _hideInstallBanners();
   if(typeof toast==='function') toast('✅ Fujup installed on your device!','s');
 });
 function installPWA(){
   if(!_deferredInstall) return;
   _deferredInstall.prompt();
-  _deferredInstall.userChoice.then(r=>{ if(r.outcome==='accepted') _deferredInstall=null; });
+  _deferredInstall.userChoice.then(r=>{ if(r.outcome==='accepted'){ _deferredInstall=null; _hideInstallBanners(); } });
 }
 </script>
 </body>
