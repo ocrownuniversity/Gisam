@@ -47,9 +47,9 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:var(--font);backgro
 
 /* ── AUTH ── */
 #auth{background:#fff;overflow-y:auto}
-#home,#walletScreen,#profileScreen,#admin,#fundWallet,#adminFundingRequests,#airtimeScreen,#dataScreen,#electricityScreen,#cableTVScreen,#schoolPinScreen,#transferScreen,#historyScreen,#notifications,#referral,#agentScreen,#securityScreen,#supportScreen,#editProfile,#pinScreen,#successScreen,#adminTransactions,#adminAPIs,#adminUsers,#adminWallets,#adminRevenueScreen,#termsScreen,#adminTerms,#adminSecurity,#kycScreen,#adminKYC,#promoScreen,#adminPromos,#adminSupport,#supportChatScreen,#adminChatReply,#rechargeScreen,#adminRechargeRequests{background:var(--bg)}
+#home,#walletScreen,#profileScreen,#admin,#fundWallet,#adminFundingRequests,#airtimeScreen,#dataScreen,#electricityScreen,#cableTVScreen,#schoolPinScreen,#transferScreen,#historyScreen,#notifications,#referral,#agentScreen,#securityScreen,#supportScreen,#editProfile,#pinScreen,#successScreen,#adminTransactions,#adminAPIs,#adminUsers,#adminWallets,#adminRevenueScreen,#termsScreen,#adminTerms,#adminSecurity,#kycScreen,#adminKYC,#promoScreen,#adminPromos,#adminSupport,#supportChatScreen,#adminChatReply,#rechargeScreen,#adminRechargeRequests,#completeRegScreen{background:var(--bg)}
 /* All non-splash/auth screens get grey background */
-#home,#walletScreen,#servicesScreen,#profileScreen,#admin,#fundWallet,#adminFundingRequests,#airtimeScreen,#dataScreen,#electricityScreen,#cableTVScreen,#schoolPinScreen,#transferScreen,#historyScreen,#notifications,#referral,#agentScreen,#securityScreen,#supportScreen,#editProfile,#adminTransactions,#adminAPIs,#adminServices,#adminPricing,#adminCountries,#adminNotifications,#adminWallets,#adminRevenueScreen,#adminAgents,#adminUsers,#pinScreen,#successScreen,#termsScreen,#adminTerms,#adminSecurity,#kycScreen,#adminKYC,#promoScreen,#adminPromos,#adminSupport,#supportChatScreen,#adminChatReply,#rechargeScreen,#adminRechargeRequests{background:var(--bg)}
+#home,#walletScreen,#servicesScreen,#profileScreen,#admin,#fundWallet,#adminFundingRequests,#airtimeScreen,#dataScreen,#electricityScreen,#cableTVScreen,#schoolPinScreen,#transferScreen,#historyScreen,#notifications,#referral,#agentScreen,#securityScreen,#supportScreen,#editProfile,#adminTransactions,#adminAPIs,#adminServices,#adminPricing,#adminCountries,#adminNotifications,#adminWallets,#adminRevenueScreen,#adminAgents,#adminUsers,#pinScreen,#successScreen,#termsScreen,#adminTerms,#adminSecurity,#kycScreen,#adminKYC,#promoScreen,#adminPromos,#adminSupport,#supportChatScreen,#adminChatReply,#rechargeScreen,#adminRechargeRequests,#completeRegScreen{background:var(--bg)}
 .auth-logo-bar{background:linear-gradient(145deg,#1E1B4B,#3B3582);padding:44px 24px 26px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .auth-logo-box{width:68px;height:68px;background:white;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.25);padding:6px}
 .auth-logo-box img{width:100%;height:100%;object-fit:contain}
@@ -570,10 +570,6 @@ textarea.form-input{resize:none}
         <div class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg></div>
         <span>Sign in with Gmail</span>
       </div>
-      <div class="social-btn-row" onclick="handlePhoneAuth()">
-        <div class="s-icon">📱</div>
-        <span>Sign in with Phone Number</span>
-      </div>
     </div>
     <div class="auth-section-hdr">Sign in with Email</div>
     <div class="auth-form-body">
@@ -597,6 +593,14 @@ textarea.form-input{resize:none}
     </div>
     <div class="auth-section-hdr">Your Personal Details</div>
     <div class="auth-form-body">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="position:relative;width:76px;margin:0 auto;cursor:pointer" onclick="document.getElementById('regPhotoInput').click()">
+          <div class="avatar avatar-lg" id="regPhotoPreview" style="overflow:hidden;width:76px;height:76px;font-size:24px">📷</div>
+          <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid white">📷</div>
+        </div>
+        <input type="file" id="regPhotoInput" accept="image/*" style="display:none" onchange="handleRegPhotoChange(this)">
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-weight:600">Upload Profile Picture <span style="color:#dc2626">*</span></div>
+      </div>
       <div class="form-group"><label class="form-label">Country</label>
         <select class="form-input" id="regCountry">
           <option value="NG">🇳🇬 Nigeria (+234)</option><option value="GH">🇬🇭 Ghana (+233)</option>
@@ -619,10 +623,66 @@ textarea.form-input{resize:none}
       <div style="background:#F5F5F5;padding:10px 0 10px 14px;margin:4px -14px 13px;font-size:12px;font-weight:700;color:var(--text);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">Set Password</div>
       <div class="form-group"><label class="form-label">Password</label><div class="input-icon-wrap"><input type="password" class="form-input" id="regPassword" placeholder="Minimum 8 characters"><button class="toggle-pw" onclick="togglePw('regPassword',this)">👁</button></div></div>
       <div class="form-group"><label class="form-label">Confirm Password</label><input type="password" class="form-input" id="regConfirm" placeholder="Repeat password"></div>
+      <div style="background:#F5F5F5;padding:10px 0 10px 14px;margin:4px -14px 13px;font-size:12px;font-weight:700;color:var(--text);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">Set Transaction PIN <span style="color:#dc2626">*</span></div>
+      <div class="form-group"><label class="form-label">4-Digit Transaction PIN</label>
+        <div class="pin-container" style="margin-top:6px">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPin1" oninput="movePIN(this,null,'regPin2')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPin2" oninput="movePIN(this,'regPin1','regPin3')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPin3" oninput="movePIN(this,'regPin2','regPin4')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPin4" oninput="movePIN(this,'regPin3',null)">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Confirm Transaction PIN</label>
+        <div class="pin-container" style="margin-top:6px">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPinConfirm1" oninput="movePIN(this,null,'regPinConfirm2')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPinConfirm2" oninput="movePIN(this,'regPinConfirm1','regPinConfirm3')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPinConfirm3" oninput="movePIN(this,'regPinConfirm2','regPinConfirm4')">
+          <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="regPinConfirm4" oninput="movePIN(this,'regPinConfirm3',null)">
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">This PIN will be required to authorize every transaction.</div>
+      </div>
       <div class="check-row"><input type="checkbox" id="termsCheck"><label for="termsCheck">I agree to the <a style="cursor:pointer" onclick="navigateTo('termsScreen')">Privacy Policy</a> and <a style="cursor:pointer" onclick="navigateTo('termsScreen')">Terms of Service</a></label></div>
       <button class="btn-register" id="registerBtn" onclick="handleRegister()">Create Account</button>
       <div class="login-footer" style="margin-top:12px">Already have an account? <span onclick="switchAuthTab('login')">Sign In</span></div>
     </div>
+  </div>
+</div>
+
+<!-- ══ COMPLETE REGISTRATION (Google sign-up: mandatory PIN + photo) ══ -->
+<div class="screen svc-form" id="completeRegScreen">
+  <div style="background:linear-gradient(145deg,#1E1B4B,#3B3582);padding:48px 16px 24px;text-align:center">
+    <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:white;margin-bottom:4px">One Last Step</div>
+    <div style="font-size:12.5px;color:rgba(255,255,255,.75)">Complete your profile to start using KOBOrush</div>
+  </div>
+  <div class="svc-form-body">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="position:relative;width:84px;margin:0 auto;cursor:pointer" onclick="document.getElementById('completeRegPhotoInput').click()">
+        <div class="avatar avatar-lg" id="completeRegPhotoPreview" style="overflow:hidden;width:84px;height:84px;font-size:26px">📷</div>
+        <div style="position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid white">📷</div>
+      </div>
+      <input type="file" id="completeRegPhotoInput" accept="image/*" style="display:none" onchange="handleCompleteRegPhotoChange(this)">
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;font-weight:600">Upload Profile Picture <span style="color:#dc2626">*</span></div>
+    </div>
+    <div style="background:#F5F5F5;padding:10px 0 10px 14px;margin:4px -14px 13px;font-size:12px;font-weight:700;color:var(--text);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">Set Transaction PIN <span style="color:#dc2626">*</span></div>
+    <div class="form-group"><label class="form-label">4-Digit Transaction PIN</label>
+      <div class="pin-container" style="margin-top:6px">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPin1" oninput="movePIN(this,null,'crPin2')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPin2" oninput="movePIN(this,'crPin1','crPin3')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPin3" oninput="movePIN(this,'crPin2','crPin4')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPin4" oninput="movePIN(this,'crPin3',null)">
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Confirm Transaction PIN</label>
+      <div class="pin-container" style="margin-top:6px">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPinConfirm1" oninput="movePIN(this,null,'crPinConfirm2')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPinConfirm2" oninput="movePIN(this,'crPinConfirm1','crPinConfirm3')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPinConfirm3" oninput="movePIN(this,'crPinConfirm2','crPinConfirm4')">
+        <input class="pin-digit" type="password" maxlength="1" inputmode="numeric" id="crPinConfirm4" oninput="movePIN(this,'crPinConfirm3',null)">
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">This PIN will be required to authorize every transaction.</div>
+    </div>
+    <button class="btn btn-primary" id="completeRegBtn" onclick="finishRegistrationSetup()" style="margin-top:8px">Finish Setup</button>
+    <button class="btn btn-ghost btn-sm" onclick="handleLogout()" style="margin-top:10px;color:var(--text3)">Cancel &amp; Sign Out</button>
   </div>
 </div>
 
@@ -2224,24 +2284,63 @@ window.handleLogin=async()=>{
   try{await signInWithEmailAndPassword(auth,email,pw)}
   catch(e){setBtnLoading('loginBtn',false,'Sign In');showToast('error',e.code==='auth/invalid-credential'?'Incorrect email or password':e.message)}
 };
+window.handleRegPhotoChange=(input)=>{
+  const file=input.files[0];if(!file)return;
+  if(file.size>8*1024*1024)return showToast('error','Image too large. Max 8MB');
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const dataURL=e.target.result;
+    try{
+      const img=new Image();
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=dataURL;});
+      const cvs=document.createElement('canvas');
+      const size=300;
+      const scale=Math.min(size/img.width,size/img.height);
+      cvs.width=Math.round(img.width*scale);
+      cvs.height=Math.round(img.height*scale);
+      cvs.getContext('2d').drawImage(img,0,0,cvs.width,cvs.height);
+      const compressed=cvs.toDataURL('image/jpeg',0.82);
+      _s.pendingRegPhoto=compressed;
+      const prev=document.getElementById('regPhotoPreview');
+      if(prev){prev.innerHTML='<img src="'+compressed+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';prev.style.fontSize='0';}
+    }catch(err){showToast('error','Could not process image');}
+  };
+  reader.readAsDataURL(file);
+};
 window.handleRegister=async()=>{
   const first=document.getElementById('regFirstName').value.trim(),last=document.getElementById('regLastName').value.trim();
   const email=document.getElementById('regEmail').value.trim(),phone=document.getElementById('regPhone').value.trim();
   const country=document.getElementById('regCountry').value,pw=document.getElementById('regPassword').value;
   const pwc=document.getElementById('regConfirm').value,ref=document.getElementById('regReferral').value.trim();
   const terms=document.getElementById('termsCheck').checked;
+  const pin=['regPin1','regPin2','regPin3','regPin4'].map(id=>document.getElementById(id)?.value||'').join('');
+  const pinConfirm=['regPinConfirm1','regPinConfirm2','regPinConfirm3','regPinConfirm4'].map(id=>document.getElementById(id)?.value||'').join('');
+  const photo=_s.pendingRegPhoto;
   if(!first||!last||!email||!phone||!pw)return showToast('error','Please fill all required fields');
   if(pw.length<8)return showToast('error','Password must be at least 8 characters');
   if(pw!==pwc)return showToast('error','Passwords do not match');
+  if(!photo)return showToast('error','Please upload a profile picture');
+  if(pin.length!==4)return showToast('error','Please set your 4-digit transaction PIN');
+  if(pinConfirm.length!==4)return showToast('error','Please confirm your transaction PIN');
+  if(pin!==pinConfirm)return showToast('error','Transaction PINs do not match');
   if(!terms)return showToast('error','Please accept the Terms');
   setBtnLoading('registerBtn',true,'Register');
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pw);
     await updateProfile(cred.user,{displayName:`${first} ${last}`});
     const rc='KBR'+genId(5),an='9'+Math.floor(Math.random()*900000000+100000000);
-    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,firstName:first,lastName:last,email,phone,country,role:email===ADMIN?'admin':'user',balance:0,totalFunded:0,totalSpent:0,pendingBalance:0,bonus:0,referralCode:rc,referredBy:ref||'',referralCount:0,referralEarned:0,accountNumber:an,agentLevel:'standard',agentCommission:0,isActive:true,kycVerified:false,transactionPIN:'',createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
+    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,firstName:first,lastName:last,email,phone,country,role:email===ADMIN?'admin':'user',balance:0,totalFunded:0,totalSpent:0,pendingBalance:0,bonus:0,referralCode:rc,referredBy:ref||'',referralCount:0,referralEarned:0,accountNumber:an,agentLevel:'standard',agentCommission:0,isActive:true,kycVerified:false,transactionPIN:pin,photoURL:photo,registrationComplete:true,createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
     if(ref){const rq=query(collection(db,'users'),where('referralCode','==',ref));const rs=await getDocs(rq);if(!rs.empty){await updateDoc(doc(db,'users',rs.docs[0].id),{balance:increment(500),referralCount:increment(1),referralEarned:increment(500)});await updateDoc(doc(db,'users',cred.user.uid),{balance:increment(200)})}}
     await addNotif(cred.user.uid,'🎉 Welcome to KOBOrush!',`Hi ${first}! Your account is ready.`,'success');
+    _s.pendingRegPhoto=null;
+    // Best-effort background upload to Storage (non-blocking; Firestore copy already saved)
+    try{
+      const sRef=storageRef(storage,'profilePics/'+cred.user.uid);
+      Promise.race([
+        uploadString(sRef,photo,'data_url').then(()=>getDownloadURL(sRef)).then(async url=>{await updateDoc(doc(db,'users',cred.user.uid),{photoURL:url});if(_s.userData)_s.userData.photoURL=url;}),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+      ]).catch(()=>{});
+    }catch(se){}
     showToast('success','Account created!');
   }catch(e){setBtnLoading('registerBtn',false,'Create Account');showToast('error',e.code==='auth/email-already-in-use'?'Email already registered':e.message)}
 };
@@ -2252,11 +2351,59 @@ window.handleGoogleAuth=async()=>{
     if(!ud.exists()){
       const[fn,...rest]=(cred.user.displayName||'User').split(' ');
       const rc='KBR'+genId(5),an='9'+Math.floor(Math.random()*900000000+100000000);
-      await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,firstName:fn,lastName:rest.join(' ')||'',email:cred.user.email,phone:'',country:'NG',role:cred.user.email===ADMIN?'admin':'user',balance:0,totalFunded:0,totalSpent:0,pendingBalance:0,bonus:0,referralCode:rc,referredBy:'',referralCount:0,referralEarned:0,accountNumber:an,agentLevel:'standard',agentCommission:0,isActive:true,kycVerified:false,transactionPIN:'',createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
+      await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,firstName:fn,lastName:rest.join(' ')||'',email:cred.user.email,phone:'',country:'NG',role:cred.user.email===ADMIN?'admin':'user',balance:0,totalFunded:0,totalSpent:0,pendingBalance:0,bonus:0,referralCode:rc,referredBy:'',referralCount:0,referralEarned:0,accountNumber:an,agentLevel:'standard',agentCommission:0,isActive:true,kycVerified:false,transactionPIN:'',photoURL:'',registrationComplete:false,createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
     }
   }catch(e){showToast('error',e.message)}
 };
-window.handlePhoneAuth=()=>showToast('info','Phone OTP coming soon');
+window.handleCompleteRegPhotoChange=(input)=>{
+  const file=input.files[0];if(!file)return;
+  if(file.size>8*1024*1024)return showToast('error','Image too large. Max 8MB');
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const dataURL=e.target.result;
+    try{
+      const img=new Image();
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=dataURL;});
+      const cvs=document.createElement('canvas');
+      const size=300;
+      const scale=Math.min(size/img.width,size/img.height);
+      cvs.width=Math.round(img.width*scale);
+      cvs.height=Math.round(img.height*scale);
+      cvs.getContext('2d').drawImage(img,0,0,cvs.width,cvs.height);
+      const compressed=cvs.toDataURL('image/jpeg',0.82);
+      _s.pendingRegPhoto=compressed;
+      const prev=document.getElementById('completeRegPhotoPreview');
+      if(prev){prev.innerHTML='<img src="'+compressed+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';prev.style.fontSize='0';}
+    }catch(err){showToast('error','Could not process image');}
+  };
+  reader.readAsDataURL(file);
+};
+window.finishRegistrationSetup=async()=>{
+  if(!_s.user)return;
+  const photo=_s.pendingRegPhoto;
+  const pin=['crPin1','crPin2','crPin3','crPin4'].map(id=>document.getElementById(id)?.value||'').join('');
+  const pinConfirm=['crPinConfirm1','crPinConfirm2','crPinConfirm3','crPinConfirm4'].map(id=>document.getElementById(id)?.value||'').join('');
+  if(!photo)return showToast('error','Please upload a profile picture');
+  if(pin.length!==4)return showToast('error','Please set your 4-digit transaction PIN');
+  if(pinConfirm.length!==4)return showToast('error','Please confirm your transaction PIN');
+  if(pin!==pinConfirm)return showToast('error','Transaction PINs do not match');
+  setBtnLoading('completeRegBtn',true,'Finish Setup');
+  try{
+    await updateDoc(doc(db,'users',_s.user.uid),{transactionPIN:pin,photoURL:photo,registrationComplete:true});
+    if(_s.userData){_s.userData.transactionPIN=pin;_s.userData.photoURL=photo;_s.userData.registrationComplete=true;}
+    _s.pendingRegPhoto=null;
+    try{
+      const sRef=storageRef(storage,'profilePics/'+_s.user.uid);
+      Promise.race([
+        uploadString(sRef,photo,'data_url').then(()=>getDownloadURL(sRef)).then(async url=>{await updateDoc(doc(db,'users',_s.user.uid),{photoURL:url});if(_s.userData)_s.userData.photoURL=url;}),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+      ]).catch(()=>{});
+    }catch(se){}
+    showToast('success','Welcome to KOBOrush!');
+    document.getElementById('bottomNav').style.display='flex';
+    showScreen('home');loadHome();
+  }catch(e){setBtnLoading('completeRegBtn',false,'Finish Setup');showToast('error',e.message)}
+};
 window.showForgotPassword=()=>showOverlay(`<div class="sheet-title">Reset Password</div><div class="sheet-sub">Enter your email and we'll send a reset link.</div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="resetEmail" placeholder="your@email.com"></div><button class="btn btn-primary" onclick="sendReset()">Send Reset Link</button><p style="font-size:11px;color:var(--text3);margin-top:12px;text-align:center">⚠️ If you don't see the email in your inbox, please check your <strong>Spam / Junk</strong> folder.</p>`);
 window.sendReset=async()=>{try{const actionCodeSettings={url:window.location.origin+(window.location.pathname||'/'),handleCodeInApp:false};await sendPasswordResetEmail(auth,document.getElementById('resetEmail').value,actionCodeSettings);showToast('success','Reset link sent!');closeOverlay()}catch(e){showToast('error',e.message)}};
 
@@ -2637,6 +2784,11 @@ onAuthStateChanged(auth,async(user)=>{
     await loadUD(user.uid);
     document.getElementById('bottomNav').style.display='flex';
     _startInactivityWatcher();
+    if(_s.userData?.registrationComplete===false){
+      document.getElementById('bottomNav').style.display='none';
+      showScreen('completeRegScreen');
+      return;
+    }
     if(_s.isAdmin){
       document.getElementById('bottomNav').style.display='none';
       // Show PIN gate before admin dashboard
