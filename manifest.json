@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "KOBOrush \u2013 Smart Payments",
+  "short_name": "KOBOrush",
+  "description": "Buy airtime, data, pay electricity & cable TV bills \u2014 fast, reliable payments for Africa.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E1B4B",
+  "theme_color": "#1E1B4B",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["finance", "utilities", "business"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
