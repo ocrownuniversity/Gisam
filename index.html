@@ -943,9 +943,10 @@ textarea.form-input{resize:none}
     <!-- STEP 1: Enter Amount + Method -->
     <div id="fundStep1">
       <!-- Payment method tabs -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-        <button id="tabManual" onclick="switchFundTab('manual')" style="background:var(--primary);color:white;border:none;border-radius:11px;padding:11px 6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">🏦 Manual Transfer</button>
-        <button id="tabPaystack" onclick="switchFundTab('paystack')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">💳 Pay with Card</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">
+        <button id="tabManual" onclick="switchFundTab('manual')" style="background:var(--primary);color:white;border:none;border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">🏦 Manual</button>
+        <button id="tabPaystack" onclick="switchFundTab('paystack')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">💳 Card</button>
+        <button id="tabDVA" onclick="switchFundTab('dva')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">🔁 Bank Transfer</button>
       </div>
 
       <!-- Manual tab content -->
@@ -985,6 +986,37 @@ textarea.form-input{resize:none}
           </div>
           <div id="paystackKeyStatus" style="font-size:11px;color:var(--text3);margin-bottom:10px;text-align:center">Loading payment gateway...</div>
           <button class="btn btn-primary" id="paystackPayBtn" onclick="initPaystackPayment()" style="background:linear-gradient(135deg,#00C3FF,#0057FF)">💳 Pay Now with Paystack</button>
+        </div>
+      </div>
+
+      <!-- Dedicated Virtual Account tab content -->
+      <div id="fundTabDVA" style="display:none">
+        <div class="fund-panel">
+          <div class="fund-panel-title"><div class="step-badge">1</div>Your Personal Bank Account</div>
+          <div style="background:#E0FDF4;border-radius:10px;padding:10px 12px;margin-bottom:13px;display:flex;gap:8px">
+            <span style="font-size:16px">✅</span>
+            <p style="font-size:11px;color:#065F46;line-height:1.5">This account is <strong>permanently yours</strong>. Transfer any amount from your own bank app, anytime — your wallet credits automatically.</p>
+          </div>
+          <div id="dvaLoadingState" style="text-align:center;padding:20px 0">
+            <div class="btn-spinner" style="margin:0 auto 10px"></div>
+            <p style="font-size:12px;color:var(--text3)">Checking your account status...</p>
+          </div>
+          <div id="dvaNoAccountState" class="hidden" style="text-align:center;padding:10px 0">
+            <p style="font-size:12.5px;color:var(--text3);margin-bottom:14px;line-height:1.5">You don't have a dedicated account number yet. Generate one now — it takes a few seconds and is free.</p>
+            <button class="btn btn-primary" id="genDVABtn" onclick="generateDedicatedAccount()">Generate My Account Number</button>
+          </div>
+          <div id="dvaAccountState" class="hidden">
+            <div style="background:linear-gradient(145deg,#1E1B4B,#3B3582);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px">
+              <div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:4px">BANK NAME</div>
+              <div id="dvaBankName" style="font-size:15px;color:white;font-weight:700;margin-bottom:14px">–</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:4px">ACCOUNT NUMBER</div>
+              <div id="dvaAccountNumber" style="font-size:24px;color:white;font-weight:800;letter-spacing:1.5px;margin-bottom:4px">–</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:12px">Account Name: <span id="dvaAccountName">–</span></div>
+              <button class="btn-ghost btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.4)" onclick="copyText('dvaAccountNumber')">📋 Copy Account Number</button>
+            </div>
+            <button class="btn btn-primary" onclick="checkDVAPayment()" id="checkDVABtn">🔄 I've Sent Money – Check Now</button>
+            <p style="font-size:11px;color:var(--text3);margin-top:10px;text-align:center;line-height:1.5">Payments are usually detected within seconds. If your balance doesn't update immediately, tap the button above.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -7226,25 +7258,117 @@ async function addNotif(uid, title, message, type='info'){
 
 // ── switchFundTab: toggle Manual / Paystack tabs ──
 window.switchFundTab=(tab)=>{
-  const isManual = tab==='manual';
-  const manTab = document.getElementById('fundTabManual');
-  const payTab = document.getElementById('fundTabPaystack');
-  const btnMan = document.getElementById('tabManual');
-  const btnPay = document.getElementById('tabPaystack');
-  if(manTab) manTab.style.display = isManual ? 'block' : 'none';
-  if(payTab) payTab.style.display = isManual ? 'none' : 'block';
-  if(btnMan){
-    btnMan.style.background = isManual ? 'var(--primary)' : 'white';
-    btnMan.style.color      = isManual ? 'white' : 'var(--text)';
-    btnMan.style.border     = isManual ? 'none' : '2px solid var(--border)';
-  }
-  if(btnPay){
-    btnPay.style.background = isManual ? 'white' : 'var(--primary)';
-    btnPay.style.color      = isManual ? 'var(--text)' : 'white';
-    btnPay.style.border     = isManual ? '2px solid var(--border)' : 'none';
-  }
-  if(!isManual) checkPaystackKey();
+  const panels = {manual:'fundTabManual', paystack:'fundTabPaystack', dva:'fundTabDVA'};
+  const btns   = {manual:'tabManual', paystack:'tabPaystack', dva:'tabDVA'};
+  Object.keys(panels).forEach(k=>{
+    const p=document.getElementById(panels[k]); if(p) p.style.display = (k===tab)?'block':'none';
+    const b=document.getElementById(btns[k]);
+    if(b){
+      b.style.background = (k===tab) ? 'var(--primary)' : 'white';
+      b.style.color      = (k===tab) ? 'white' : 'var(--text)';
+      b.style.border     = (k===tab) ? 'none' : '2px solid var(--border)';
+    }
+  });
+  if(tab==='paystack') checkPaystackKey();
+  if(tab==='dva') loadDVAUI();
 };
+
+// ── Dedicated Virtual Account (auto bank-transfer funding via Paystack) ──
+window.loadDVAUI=async()=>{
+  const loading=document.getElementById('dvaLoadingState');
+  const noAcct=document.getElementById('dvaNoAccountState');
+  const hasAcct=document.getElementById('dvaAccountState');
+  if(!loading||!noAcct||!hasAcct)return;
+  loading.classList.remove('hidden');noAcct.classList.add('hidden');hasAcct.classList.add('hidden');
+  loading.style.display='block';
+  await loadUD(_s.user.uid); // refresh in case it was set elsewhere
+  const d=_s.userData;
+  loading.style.display='none';
+  if(d?.dvaAccountNumber){
+    document.getElementById('dvaBankName').textContent=d.dvaBankName||'–';
+    document.getElementById('dvaAccountNumber').textContent=d.dvaAccountNumber;
+    document.getElementById('dvaAccountName').textContent=d.dvaAccountName||(d.firstName+' '+d.lastName);
+    hasAcct.classList.remove('hidden');
+  }else{
+    noAcct.classList.remove('hidden');
+  }
+};
+window.generateDedicatedAccount=async()=>{
+  const btn=document.getElementById('genDVABtn');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="btn-spinner"></span> Generating...';}
+  try{
+    const sec=await _getPaystackSecret();
+    if(!sec)throw new Error('Paystack not configured. Contact admin.');
+    const d=_s.userData;
+    // 1. Create (or reuse) a Paystack customer for this user
+    const custRes=await fetch('https://api.paystack.co/customer',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+sec,'Content-Type':'application/json'},
+      body:JSON.stringify({email:d.email,first_name:d.firstName,last_name:d.lastName,phone:d.phone||''})
+    });
+    const custJson=await custRes.json();
+    if(!custJson.status)throw new Error(custJson.message||'Could not create customer profile');
+    const customerCode=custJson.data.customer_code;
+    // 2. Create the dedicated virtual account for that customer
+    const dvaRes=await fetch('https://api.paystack.co/dedicated_account',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+sec,'Content-Type':'application/json'},
+      body:JSON.stringify({customer:customerCode,preferred_bank:'wema-bank'})
+    });
+    const dvaJson=await dvaRes.json();
+    if(!dvaJson.status)throw new Error(dvaJson.message||'Could not generate account number. Your Paystack account may need to enable Dedicated Virtual Accounts.');
+    const acct=dvaJson.data;
+    await updateDoc(doc(db,'users',_s.user.uid),{
+      dvaAccountNumber:acct.account_number,
+      dvaBankName:acct.bank?.name||'Wema Bank',
+      dvaAccountName:acct.account_name,
+      dvaCustomerCode:customerCode,
+      dvaAccountId:acct.id
+    });
+    if(_s.userData){
+      _s.userData.dvaAccountNumber=acct.account_number;
+      _s.userData.dvaBankName=acct.bank?.name||'Wema Bank';
+      _s.userData.dvaAccountName=acct.account_name;
+      _s.userData.dvaCustomerCode=customerCode;
+      _s.userData.dvaAccountId=acct.id;
+    }
+    showToast('success','Account number generated!');
+    loadDVAUI();
+  }catch(e){
+    showToast('error',e.message);
+    if(btn){btn.disabled=false;btn.innerHTML='Generate My Account Number';}
+  }
+};
+window.checkDVAPayment=async()=>{
+  const btn=document.getElementById('checkDVABtn');
+  const customerCode=_s.userData?.dvaCustomerCode;
+  if(!customerCode)return showToast('error','No dedicated account found');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="btn-spinner"></span> Checking...';}
+  try{
+    const sec=await _getPaystackSecret();
+    if(!sec)throw new Error('Paystack not configured');
+    const r=await fetch(`https://api.paystack.co/transaction?customer=${customerCode}&status=success&perPage=20`,{headers:{'Authorization':'Bearer '+sec}});
+    const j=await r.json();
+    if(!j.status)throw new Error(j.message||'Could not check transactions');
+    const txs=(j.data||[]).filter(t=>t.channel==='dedicated_nuban');
+    if(!txs.length){showToast('info','No new payment found yet. Try again in a moment.');if(btn){btn.disabled=false;btn.innerHTML='🔄 I\'ve Sent Money – Check Now';}return;}
+    let creditedAny=false;
+    for(const t of txs){
+      const txDocId='dva_'+t.id;
+      const existing=await getDoc(doc(db,'transactions',txDocId));
+      if(existing.exists())continue; // already credited
+      const amount=t.amount/100;
+      await setDoc(doc(db,'transactions',txDocId),{id:txDocId,userId:_s.user.uid,type:'fund_approved',status:'success',amount,description:'Wallet Funded via Bank Transfer (Dedicated Account)',reference:t.reference,createdAt:serverTimestamp()});
+      await updateDoc(doc(db,'users',_s.user.uid),{balance:increment(amount),totalFunded:increment(amount)});
+      addNotif(_s.user.uid,'✅ Wallet Funded!','₦'+amount.toLocaleString()+' via Bank Transfer','success').catch(()=>{});
+      creditedAny=true;
+    }
+    if(creditedAny){showToast('success','Payment confirmed! Wallet credited.');navigateTo('home');}
+    else{showToast('info','No new payment to credit — it may already be added.');}
+  }catch(e){showToast('error',e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='🔄 I\'ve Sent Money – Check Now';}}
+};
+
 
 // ── resetFundWallet: reset to step 1 on navigate ──
 window.resetFundWallet=()=>{
