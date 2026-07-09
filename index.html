@@ -943,33 +943,13 @@ textarea.form-input{resize:none}
     <!-- STEP 1: Enter Amount + Method -->
     <div id="fundStep1">
       <!-- Payment method tabs -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">
-        <button id="tabManual" onclick="switchFundTab('manual')" style="background:var(--primary);color:white;border:none;border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">🏦 Manual</button>
-        <button id="tabPaystack" onclick="switchFundTab('paystack')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">💳 Card</button>
-        <button id="tabDVA" onclick="switchFundTab('dva')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 4px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">🔁 Bank Transfer</button>
-      </div>
-
-      <!-- Manual tab content -->
-      <div id="fundTabManual">
-        <div class="fund-panel">
-          <div class="fund-panel-title"><div class="step-badge">1</div>Enter Amount to Fund</div>
-          <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" class="form-input" id="fundAmount" placeholder="Enter amount e.g. 5000"></div>
-          <div class="chip-row">
-            <div class="chip" onclick="setVal('fundAmount',500)">₦500</div>
-            <div class="chip" onclick="setVal('fundAmount',1000)">₦1,000</div>
-            <div class="chip" onclick="setVal('fundAmount',2000)">₦2,000</div>
-            <div class="chip" onclick="setVal('fundAmount',5000)">₦5,000</div>
-            <div class="chip" onclick="setVal('fundAmount',10000)">₦10,000</div>
-            <div class="chip" onclick="setVal('fundAmount',50000)">₦50,000</div>
-          </div>
-          <div class="form-group"><label class="form-label">Your Name (as it appears on transfer)</label><input type="text" class="form-input" id="fundSenderName" placeholder="e.g. John Doe"></div>
-          <div class="form-group"><label class="form-label">Note / Description (Optional)</label><input type="text" class="form-input" id="fundNote" placeholder="e.g. Wallet top-up"></div>
-          <button class="btn btn-primary" onclick="goToFundStep2()">Continue →</button>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <button id="tabPaystack" onclick="switchFundTab('paystack')" style="background:var(--primary);color:white;border:none;border-radius:11px;padding:11px 6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">💳 Card</button>
+        <button id="tabDVA" onclick="switchFundTab('dva')" style="background:white;color:var(--text);border:2px solid var(--border);border-radius:11px;padding:11px 6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">🔁 Bank Transfer</button>
       </div>
 
       <!-- Paystack tab content -->
-      <div id="fundTabPaystack" style="display:none">
+      <div id="fundTabPaystack">
         <div class="fund-panel">
           <div class="fund-panel-title"><div class="step-badge">1</div>Pay with Paystack</div>
           <div style="background:#E0FDF4;border-radius:10px;padding:10px 12px;margin-bottom:13px;display:flex;gap:8px">
@@ -7260,10 +7240,10 @@ async function addNotif(uid, title, message, type='info'){
   }catch(e){ console.warn('addNotif failed:',e.message); }
 }
 
-// ── switchFundTab: toggle Manual / Paystack tabs ──
+// ── switchFundTab: toggle Card / Bank Transfer tabs ──
 window.switchFundTab=(tab)=>{
-  const panels = {manual:'fundTabManual', paystack:'fundTabPaystack', dva:'fundTabDVA'};
-  const btns   = {manual:'tabManual', paystack:'tabPaystack', dva:'tabDVA'};
+  const panels = {paystack:'fundTabPaystack', dva:'fundTabDVA'};
+  const btns   = {paystack:'tabPaystack', dva:'tabDVA'};
   Object.keys(panels).forEach(k=>{
     const p=document.getElementById(panels[k]); if(p) p.style.display = (k===tab)?'block':'none';
     const b=document.getElementById(btns[k]);
@@ -7393,8 +7373,8 @@ window.resetFundWallet=()=>{
   ['fundAmount','fundSenderName','fundNote','paystackAmount'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
-  // Reset tabs to manual
-  switchFundTab('manual');
+  // Reset tabs to Card (default)
+  switchFundTab('paystack');
   // Clear proof state
   _s.proofDataURL=null;
   _s.fundAmount=0;
