@@ -4494,6 +4494,10 @@ async function confirmTx(pin){
       ].map(i=>`<div class="receipt-row"><span class="r-label">${i.l}</span><span class="r-val">${i.v}</span></div>`).join('');
     } else {
       // ── VTU / BANK TRANSFER TRANSACTIONS ──
+      // NOTE: a secured server-side version of this (purchaseVTU Cloud
+      // Function) has been built and is ready in /functions — this stays
+      // on the original all-client-side flow until that's deployed, so
+      // the app keeps working standalone with no extra infrastructure.
       const VTU_TYPES = ['airtime','data','electricity','cabletv','schoolpin'];
       const isVTU = VTU_TYPES.includes(d.type);
       // Revenue margin: transfers use the explicit sendAmount/amount fee.
